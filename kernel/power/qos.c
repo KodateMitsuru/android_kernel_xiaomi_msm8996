@@ -480,8 +480,6 @@ int pm_qos_request_for_cpumask(int pm_qos_class, struct cpumask *mask)
 	val = c->default_value;
 
 	for_each_cpu(cpu, mask) {
-		if (cpu_isolated(cpu))
-			continue;
 
 		switch (c->type) {
 		case PM_QOS_MIN:
@@ -861,6 +859,9 @@ static ssize_t pm_qos_power_write(struct file *filp, const char __user *buf,
 {
 	s32 value;
 	struct pm_qos_request *req;
+
+	/* Don't let userspace impose restrictions on CPU idle levels */
+	return count;
 
 	if (count == sizeof(s32)) {
 		if (copy_from_user(&value, buf, sizeof(s32)))
